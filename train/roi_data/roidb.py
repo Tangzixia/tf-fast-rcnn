@@ -109,10 +109,13 @@ def add_bbox_regression_targets(roidb):
 def _compute_targets(rois, overlaps, labels):
     """Compute bounding-box regression targets for an image."""
     # Indices of ground-truth ROIs
+    #这里可以计算出来ground-truth的个数,假设rois为[2000,5],overlaps为[2000,1],labels为[2000,1]，则这样可以计算出来ground truth的所在的行，假设gt_inds为[4]
     gt_inds = np.where(overlaps == 1)[0]
     # Indices of examples for which we try to make predictions
+    #假设这儿所对应的为[500]
     ex_inds = np.where(overlaps >= cfg.TRAIN.BBOX_THRESH)[0]
 
+    #计算每一个ex ROI和ground truth的交集，可以得到[500,4]
     # Get IoU overlap between each ex ROI and gt ROI
     ex_gt_overlaps = bbox_overlaps(
         np.ascontiguousarray(rois[ex_inds, :], dtype=np.float),
@@ -120,7 +123,9 @@ def _compute_targets(rois, overlaps, labels):
 
     # Find which gt ROI each ex ROI has max overlap with:
     # this will be the ex ROI's gt target
+    #这样可以得到[500]
     gt_assignment = ex_gt_overlaps.argmax(axis=1)
+    #则这样便可以得到最后的几个可选择候选框！
     gt_rois = rois[gt_inds[gt_assignment], :]
     ex_rois = rois[ex_inds, :]
 
